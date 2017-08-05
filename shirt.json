@@ -1,0 +1,33 @@
+{
+  "title": [
+    "Logo Shirt, Red",
+    "Mike the Frog Shirt, Black",
+    "Mike the Frog Shirt, Blue",
+    "Logo Shirt, Green",
+    "Mike the Frog Shirt, Yellow",
+    "Logo Shirt, Gray",
+    "Logo Shirt, Teal",
+    "Mike the Frog Shirt, Orange"
+  ],
+  "price": "",
+  "url": [
+    "shirt.php?id=101",
+    "shirt.php?id=102",
+    "shirt.php?id=103",
+    "shirt.php?id=104",
+    "shirt.php?id=105",
+    "shirt.php?id=106",
+    "shirt.php?id=107",
+    "shirt.php?id=108"
+  ],
+  "urlImage": [
+    "img/shirts/shirt-101.jpg",
+    "img/shirts/shirt-102.jpg",
+    "img/shirts/shirt-103.jpg",
+    "img/shirts/shirt-104.jpg",
+    "img/shirts/shirt-105.jpg",
+    "img/shirts/shirt-106.jpg",
+    "img/shirts/shirt-107.jpg",
+    "img/shirts/shirt-108.jpg"
+  ]
+}
