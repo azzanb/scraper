@@ -51,7 +51,7 @@ request({
     shirt.urlImage = urlImageArr;
   });
 
-//Grab prices
+//Grab prices -- PROBLEM IS THIS SECTION
   const priceURL = shirt.url;
 
   priceURL.forEach(function(ele){
