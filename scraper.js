@@ -1,72 +1,99 @@
-var fs = require('fs'),
-  request = require('request'),
-  json2csv = require('json2csv'),
-  scrape = require('scrape-it'),
-  cheerio = require('cheerio'),
+const fs = require('fs'),
+  json2csv = require('json2csv'), //parses JSON to CSV
+  scrape = require('scrape-it'), //Scrapes shirt info 
+  request = require('request'), //handles errors
+  date = new Date(),
   url = 'http://www.shirts4mike.com/shirts.php',
-  mainPage = 'http://www.shirts4mike.com/';
-  ws = fs.createWriteStream('scraper.csv');
+  mainPage = 'http://www.shirts4mike.com/', 
+  priceData = [];
 
- // const shirtURL = data.shirts[4].shirtImageURL;
- //        const priceURL = data.shirts;
- //        priceURL.forEach(function(ele, i){
-          
- //        });
-
+//These variables are for setting the current time for each shirt object
+const hour = date.getUTCHours(),
+      min = date.getUTCMinutes(),
+      sec = date.getUTCSeconds();
+   
 //Create 'data' folder if it doesn't exist
 !fs.existsSync('data') ? fs.mkdirSync('data') : false;
 
+//Save file based on date created
+const year = date.getFullYear(),
+      month = date.getMonth(),
+      day = date.getDate();
+let saveDateFile = `${year}-${month}-${day}`;
+let file = `./data/${saveDateFile}.csv`;
+
+//Scrape title, URLs of shirt and shirt image
 scrape(url, 
   { 
     shirts: {
       listItem: ".products li",
       data: {
-        'title': {
+        title: {
           selector:"img",
           attr: "alt"
         },
-        'price': {
-          selector: "span.price"
-
-        },
-        'shirtURL': {
+        shirtURL: {
           selector: "a",
           attr: "href", 
           convert: x => mainPage + x
         },
-        'shirtImageURL': {
+        shirtImageURL: {
           selector: "img",
           attr: "src",
           convert: x => mainPage + x
-        }
+        },
+        
       }
     } 
+  //Next, scrape prices from each shirt url. 
 }).then(data => {
-    const arr = data.shirts;
-    //console.log(arr);
-    arr.forEach(function(ele, i){
-      const fields = ['ele.title', 'ele.shirtURL', 'ele.shirtImageURL'];
-      const fieldNames = ["Shirt Name", "Shirt URL", "Shirt Image URL"];
-      const csv = json2csv({data: arr, fields: fields, fieldNames: fieldNames});
-      console.log(csv);
-     
-     // fs.writeFile('shirt.csv', csv, function(err){
-     //  if(err) throw err;
-     //  console.log("Works");
-     // });
-    });  
-  });
+    const arrOfShirts = data.shirts;
     
+    /* get shirt urls, put urls in array, then scrape price of each shirt
+      by looping through the array */
+    arrOfShirts.forEach(function(ele, i){
+      const urls = ele.shirtURL; 
+      priceData.push(urls); 
+      scrape(priceData[i],
+        {
+          shirts: {
+            listItem: "h1",
+            data: {
+              price: {
+                selector: ".price",
+              }
+            } 
+          }
+      }).then(shirts => {
+        arrOfShirts[i].price = shirts.shirts[1].price;
+        arrOfShirts[i].time = `${hour}:${min}:${sec}`; //this sets the UTC time at which each shirt was scraped
 
+        //Set column headers and row information of csv file
+        const fields = ['title', 'price', 'shirtURL', 'shirtImageURL', 'time'],
+              fieldNames = ["Shirt Name", "Price", "Shirt URL", "Shirt Image URL", "Time"],
+              csv = json2csv({data: arrOfShirts, fields: fields, fieldNames: fieldNames});
+    
+         fs.writeFile(file, csv, function(err){
+          if(err) throw err;
+         });
+      }); 
+    }); 
+  });
 
-  
+//If error occurs connecting to the website, log time and add info to an error file
+let toDate = date.toDateString(),
+    time = date.toTimeString(),
+    fullDate = `${toDate} ${time}`;
 
-
-
-
-
-
-
-
-
+const req = request(url);
+req.on('response', function(res){
+  if(res.statusCode === 404){
+    if(!fs.existsSync('scraper-error.log')){
+      const options = `Could not complete network connection: ${fullDate} | res.message`;
+      fs.writeFIle('./data/scraper-error.log', options, () => {
+        console.log("Error File Created");
+      });
+    }
+  }
+});
 

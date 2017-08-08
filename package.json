@@ -4,7 +4,7 @@
   "description": "Scrape Information from website",
   "main": "scraper.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node scraper.js"
   },
   "repository": {
     "type": "git",
@@ -21,7 +21,6 @@
   },
   "homepage": "https://github.com/azzanb/scraper#readme",
   "dependencies": {
-    "cheerio": "^1.0.0-rc.2",
     "json2csv": "^3.11.0",
     "request": "^2.81.0",
     "scrape-it": "^3.3.2"
