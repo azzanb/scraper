@@ -1,7 +1,6 @@
 const fs = require('fs'),
   json2csv = require('json2csv'), //parses JSON to CSV
   scrape = require('scrape-it'), //Scrapes shirt info 
-  request = require('request'), //handles errors
   date = new Date(),
   url = 'http://www.shirts4mike.com/shirts.php',
   mainPage = 'http://www.shirts4mike.com/', 
@@ -78,22 +77,18 @@ scrape(url,
          });
       }); 
     }); 
-  });
-
-//If error occurs connecting to the website, log time and add info to an error file
-let toDate = date.toDateString(),
-    time = date.toTimeString(),
-    fullDate = `${toDate} ${time}`;
-
-const req = request(url);
-req.on('response', function(res){
-  if(res.statusCode === 404){
-    if(!fs.existsSync('scraper-error.log')){
-      const options = `Could not complete network connection: ${fullDate} | res.message`;
-      fs.writeFIle('./data/scraper-error.log', options, () => {
-        console.log("Error File Created");
-      });
+  }).catch((e) => {
+    //catch any 404 errors and log message, as well as create an error log file
+    let toDate = date.toDateString(),
+        time = date.toTimeString(),
+        fullDate = `${toDate} ${time}`;
+        
+    if(e.code === "ENOTFOUND"){
+      if(!fs.existsSync('scraper-error.log')){
+        const options = `Could not complete network connection: ${fullDate} | ${e.code}`;
+        fs.writeFile('./data/scraper-error.log', options, () => {
+          console.log("Error File Created. Check scraper-error.log file for details.");
+         });
+      }
     }
-  }
-});
-
+  });
